@@ -1,0 +1,393 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aiml version="2.0">
+
+
+
+
+<!--                       AGREGAR UN CONTACTO                             -->
+
+	<category>
+		<pattern>PATRON AGREGAR CONTACTO PATRON</pattern>
+		<template>Cuales son sus apellidos?</template>
+	</category>
+	<category>
+		<pattern>*</pattern>
+		<that>cuales son sus apellidos</that>
+		<template>
+			<think>
+				<addtomap>
+					<name>apellido</name>
+					<key><star/></key>
+					<value>1</value>
+				</addtomap>
+				<addtoset>
+					<name>apellido</name>
+					<key><star/></key>
+				</addtoset>
+				<set name="aux"><star/></set>
+			</think>
+			<srai>PATRON PEDIR NOMBRE PATRON</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>PATRON PEDIR NOMBRE PATRON</pattern>
+		<template>Y como se llama?</template>
+	</category>
+	<category>
+		<pattern>(se llama) *</pattern>
+		<that>y como se llama</that>
+		<template>
+			<think><addtomap>
+				<name>nombre</name>
+				<key><get name="aux"/></key>
+				<value><star/></value>
+			</addtomap></think>
+			<srai>PATRON PEDIR TELEFONO PATRON</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>PATRON PEDIR TELEFONO PATRON</pattern>
+		<template>y su telefono?</template>
+	</category>
+	<category>
+		<pattern>*</pattern>
+		<that>y su telefono</that>
+		<template>
+			<srai>PATRON PEDIR TELEFONO PATRON</srai>
+		</template>
+	</category>
+	<category>
+		<pattern><set>number</set></pattern>
+		<that>y su telefono</that>
+		<template>
+			<think><addtomap>
+				<name>tlf</name>
+				<key><get name="aux"/></key>
+				<value><star/></value>
+			</addtomap></think>
+			<srai>PATRON PEDIR DIRECCION PATRON</srai>
+		</template>
+	</category>
+	<category>
+		<pattern>PATRON PEDIR DIRECCION PATRON</pattern>
+		<template>Y donde vive esa belleza?</template>
+	</category>
+	<category>
+		<pattern>*</pattern>
+		<that>y donde vive esa belleza</that>
+		<template>
+			<think><addtomap>
+				<name>direccion</name>
+				<key><get name="aux"/></key>
+				<value><star/></value>
+			</addtomap></think>
+			He agregado a <get name="aux"/> a tus contactos. Pronto iré a visitarlo :D
+		</template>
+	</category>
+
+
+
+	<category>
+		<pattern>^ agregar ^ contacto</pattern>
+		<template>Como mandeis.<srai>PATRON AGREGAR CONTACTO PATRON</srai></template>
+	</category>
+	<category>
+		<pattern>tengo un nuevo amigo</pattern>
+		<template>¿Genial!¿Me lo presentas? Estoy un poco solo...<srai>PATRON AGREGAR CONTACTO PATRON</srai></template>
+	</category>
+	<category>
+		<pattern>he conocido a alguien</pattern>
+		<template>Seguro que es alguien genial. <srai>PATRON AGREGAR CONTACTO PATRON</srai></template>
+	</category>
+
+
+
+
+
+
+
+
+
+<!--                       CANTIDAD DE CONTACTOS                             -->
+	<category>
+		<pattern>PATRON CONTAR CONTACTOS PATRON</pattern>
+		<template>
+			<think><set var="valores"><readset>apellido</readset></set></think>
+			<srai>orden cuenta contactos <get var="valores"/></srai>
+		</template>
+	</category>
+
+	<category>
+		<pattern>orden cuenta contactos</pattern>
+		<template>Pues... me parece que no tienes amigos, ¿yo cuento?</template>
+	</category>
+	<category>
+		<pattern>orden cuenta contactos *</pattern>
+		<template>
+			<think>
+				<set var="count">0</set>
+				<set var="list">
+					<star/>
+				</set>
+				<set var="item">
+					<srai>TOP <get var="list"/></srai>
+				</set>
+			</think>
+			<condition var="item">
+				<li>
+					<value>$</value>
+					<get var="count"/> contactos. 
+Yo tengo esos y uno más ;D.
+				</li>
+				<li>
+					<think>
+					<set var="usuarioactivo"><map name="apellido"><get var="item"/></map></set>
+					<condition var="usuarioactivo">
+						<li value="1"><set var="count">
+							<map>
+								<name>successor</name>
+								<get var="count"/>
+							</map>
+						</set></li>
+					</condition>
+						<set var="list">
+							<srai>REMAIN <get var="list"/></srai>
+						</set>
+						<set var="item">
+							<srai>TOP <get var="list"/></srai>
+						</set>
+					</think>
+					<loop/>
+				</li>
+			</condition>
+		</template>
+	</category>
+
+
+	<category>
+		<pattern>^ cuantos [contactos amigos conocidos] ^</pattern>
+		<template><srai>PATRON CONTAR CONTACTOS PATRON</srai></template>
+	</category>
+
+
+
+
+
+
+
+<!--                       LISTAR CONTACTOS                             -->
+
+	<category>
+		<pattern>PATRON LISTAR CONTACTOS PATRON</pattern>
+	<template>
+		Tus contactos son:<think>
+			<set var="lista"><readset>apellido</readset></set>
+			<set var="primero"><srai>TOP <get var="lista"/></srai></set>
+		</think>
+		<condition var="primero">
+			<li value="$">
+				Un total de <srai>PATRON CONTAR CONTACTOS PATRON</srai>.
+			</li>
+			<li><think>
+				<set var="usuarioactivo"><map name="apellido"><get var="primero"/></map></set>
+			</think><condition var="usuarioactivo">
+				<li value="1">
+- <get var="primero"/>, <map name="nombre"><get var="primero"/></map></li>
+
+			</condition><think>
+				<set var="lista"><srai>REMAIN <get var="lista"/></srai></set>
+				<set var="primero"><srai>TOP <get var="lista"/></srai></set>
+			</think><loop/></li>
+		</condition>
+	</template>
+	</category>
+
+
+
+	<category>
+		<pattern>^ ver (mis) (los) contactos ^</pattern>
+		<template>Ahora mismo te los miro. <srai>PATRON LISTAR CONTACTOS PATRON</srai></template>
+	</category>
+	<category>
+		<pattern>^ consultar (los) (mis) contactos ^</pattern>
+		<template>Tu mandas mi senior. <srai>PATRON LISTAR CONTACTOS PATRON</srai></template>
+	</category>
+	<category>
+		<pattern>^ listar (los) (mis) contactos ^</pattern>
+		<template>Claro jefe. <srai>PATRON LISTAR CONTACTOS PATRON</srai></template>
+	</category>
+	<category>
+		<pattern>a quien conozco</pattern>
+		<template>Conoces a mucha gente. <srai>PATRON LISTAR CONTACTOS PATRON</srai></template>
+	</category>
+
+
+
+
+
+
+
+<!--                       CONSULTAR DATOS DE UN CONTACTO                             -->
+
+	<category>
+		<pattern>PATRON DATOS DE * PATRON</pattern>
+	<template>
+		<think>
+			<set var="usuarioactivo"><map name="apellido"><star/></map></set>
+		</think>
+		<condition var="usuarioactivo">
+		<li value="1">
+		Conozco los siguiente datos de <star/>:
+		-Nombre completo: <map name="nombre"><star/></map> <star/>
+		-Dirección:       <map name="direccion"><star/></map>
+		-Teléfono:        <map name="tlf"><star/></map>
+		</li>
+		<li value="0">
+		Lo siento mucho, yo... es que me dijiste que lo borrara.
+		</li>
+		<li>
+		Nunca me has presentado a nadie cuyo apellido sea <star/>.
+		</li>
+		</condition>
+	</template>
+	</category>
+
+
+	<category>
+		<pattern>^ (ver) (los) datos de *</pattern>
+		<template>Voy a hacer memoria... <srai>PATRON DATOS DE <star index="2"/> PATRON</srai></template>
+	</category>
+	<category>
+		<pattern>^ consultar a *</pattern>
+		<template>Vamos a ver...<srai>PATRON DATOS DE <star index="2"/> PATRON</srai></template>
+	</category>
+	<category>
+		<pattern>^ consultar (los) datos de *</pattern>
+		<template>Vamos allá. <srai>PATRON DATOS DE <star index="2"/> PATRON</srai></template>
+	</category>
+	<category>
+		<pattern>^ listar (los) datos de *</pattern>
+		<template>Listo calisto. <srai>PATRON DATOS DE <star index="2"/> PATRON</srai></template>
+	</category>
+	<category>
+		<pattern>es * mi amigo</pattern>
+		<template>Amigo no lo sé. <srai>PATRON DATOS DE <star/> PATRON</srai></template>
+	</category>
+
+
+
+
+
+
+
+<!--                       MODIFICAR DATOS DE UN CONTACTO                             -->
+
+	<category>
+		<pattern>PATRON MODIFICAR TELEFONO DE * A * PATRON</pattern>
+	<template>
+		<modifymap>
+			<name>tlf</name>
+			<key><star index="1"/></key>
+			<value><star index="2"/></value>
+		</modifymap>
+	</template>
+	</category>
+
+	<category>
+		<pattern>^ cambiar (el) telefono de * a *</pattern>
+		<template><think>
+			<set name="aux"><star index="2"/></set>
+			<set name="aux2"><star index="3"/></set>
+		</think>Estas seguro de que quieres cambiar el tlf</template>
+	</category>
+	<category>
+		<pattern>si</pattern>
+		<that>estas seguro de que quieres cambiar el tlf</that>
+		<template><srai>PATRON MODIFICAR TELEFONO DE <get name="aux"/> A <get name="aux2"/> PATRON</srai></template>
+	</category>
+
+
+	<category>
+		<pattern>PATRON MODIFICAR DIRECCION DE * A * PATRON</pattern>
+	<template>
+		<modifymap>
+			<name>direccion</name>
+			<key><star index="1"/></key>
+			<value><star index="2"/></value>
+		</modifymap>
+	</template>
+	</category>
+
+	<category>
+		<pattern>^ cambiar (la) direccion de * a *</pattern>
+		<template><think>
+			<set name="aux"><star index="2"/></set>
+			<set name="aux2"><star index="3"/></set>
+		</think>Estas seguro de que quieres cambiar la direccion?</template>
+	</category>
+	<category>
+		<pattern>si</pattern>
+		<that>estas seguro de que quieres cambiar la direccion</that>
+		<template><srai>PATRON MODIFICAR DIRECCION DE <get name="aux"/> A <get name="aux2"/> PATRON</srai></template>
+	</category>
+
+
+
+
+
+<!--                       BORRAR UN CONTACTO          (es un borrado lógico)                   -->
+
+	<category>
+		<pattern>PATRON BORRAR A * PATRON</pattern>
+	<template>
+		<think>
+			<set var="usuarioactivo"><map name="apellido"><star/></map></set>
+		</think>
+		<condition var="usuarioactivo">
+		<li value="1"><think>
+		<removefrommap>
+			<name>apellido</name>
+			<key><star/></key>
+		</removefrommap>
+		<removefrommap>
+			<name>tlf</name>
+			<key><star/></key>
+		</removefrommap>
+		<removefrommap>
+			<name>direccion</name>
+			<key><star/></key>
+		</removefrommap>
+		<removefrommap>
+			<name>nombre</name>
+			<key><star/></key>
+		</removefrommap>
+		<removefromset>
+			<name>apellido</name>
+			<key><star/></key>
+		</removefromset>
+		</think>Borrado!</li>
+		<li value="0">
+		Ya borraste a ese contacto. Parece que odias mucho a esa persona... podría encargar un borrado total, ya me entiendes.
+		</li>
+		<li>
+		Nunca me has presentado a nadie cuyo apellido sea <star/> ¿Me estas siendo infiel?
+		</li>
+		</condition>
+	</template>
+	</category>
+
+
+
+	<category>
+		<pattern>^ [eliminar destruir aniquilar matar borrar] a *</pattern>
+		<template><think>
+			<set name="aux"><star index="2"/></set>
+		</think>Estas seguro de que quieres destruir el contacto?</template>
+	</category>
+	<category>
+		<pattern>si</pattern>
+		<that>estas seguro de que quieres destruir el contacto</that>
+		<template><srai>PATRON BORRAR A <get name="aux"/> PATRON</srai></template>
+	</category>
+
+</aiml>

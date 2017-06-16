@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aiml version="2.0">
+
+<!--                       BORRAR UN CONTACTO          (es un borrado lógico)                   -->
+
+	<category>
+		<pattern>que dia es hoy</pattern>
+		<template>
+			<date format="%e"/>
+		</template>
+	</category>
+
+</aiml>
