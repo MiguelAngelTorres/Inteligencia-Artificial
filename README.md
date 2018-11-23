@@ -5,4 +5,4 @@
 This code might not work without the main game code, howerver it would be a nice code to understand the algorithm's idea.
 
 3 is a mix of files which are some rules of a conversational agent. It is written with AIML and again, it will not work without the
-right program.
+right program. The agent simules a conversational scheduler for manage appointments, saving the place, the our, and the personal details of the people who comes to it.
